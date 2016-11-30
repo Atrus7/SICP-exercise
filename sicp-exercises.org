@@ -1,0 +1,1319 @@
+#+TITLE: SICP Exercises 
+#+AUTHOR: Christopher Findeisen
+#+OPTIONS: texht:t
+#+LATEX_CLASS: article
+#+DATE: \today
+
+* Intro
+In order to run this code in emacs, you should run this elisp
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'org-src-lang-modes '("scheme" . scheme) )
+(add-to-list 'org-babel-load-languages '(scheme . t))
+(org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t) (scheme . t) ))
+#+end_src
+
+#+RESULTS:
+: ((emacs-lisp . t) (scheme . t))
+
+* Ch 1
+** DONE Exercise 1.1.
+CLOSED: [2016-11-28 Mon 12:47]
+Below is a sequence of expressions. What is the result printed by the interpreter in response to each expression? Assume that the sequence is to be evaluated in the order in which it is presented.
+
+10
+
+(+ 5 3 4)
+
+(- 9 1)
+
+(/ 6 2)
+
+(+ (* 2 4) (- 4 6))
+
+(define a 3)
+
+(define b (+ a 1))
+
+(+ a b (* a b))
+
+(= a b)
+
+(if (and (> b a) (< b (* a b)))
+    b
+    a)
+
+(cond ((= a 4) 6)
+      ((= b 4) (+ 6 7 a))
+      (else 25))
+
+(+ 2 (if (> b a) b a))
+
+(* (cond ((> a b) a)
+        ((< a b) b)
+        (else -1))
+  (+ a 1))
+
+*** Answers
+  10
+
+  12
+
+  8
+
+  3
+
+  6
+
+  a 
+
+  b
+
+  19 
+
+  #f 
+
+  4
+
+  16
+
+  6
+
+  16
+
+** DONE Exercise 1.2.
+CLOSED: [2016-11-28 Mon 12:47]
+Translate the following expression into prefix form
+[[file:book/ch1-Z-G-3.gif][(5 + 4 + (2 - (3 - (6 + (4/5))))) / (3(6 - 2)(2-7))]]
+
+#+begin_src scheme :tangle yes
+(/ ( + 5
+      4
+      (- 2 (- 3 ( + 6 (/ 4 5)))))
+  (* 3
+      (- 6 2)
+      (- 2 7)))
+#+end_src
+** DONE Exercise 1.3.
+CLOSED: [2016-11-28 Mon 12:47]
+Define a procedure that takes three numbers as arguments and returns the sum of the squares of the two larger numbers.
+#+begin_src scheme :tangle yes 
+(define (square x) (* x x))
+(define (largest x y)
+  (if (> x y)
+      x
+      y))
+
+(define (sum-of-squares n1 n2 n3)
+  (let (
+        (n1 (largest n1 n2))
+        (n2 (largest n2 n3)))
+    (+ (square n1) (square n2))
+    )
+  )
+(sum-of-squares 2 3 4)
+#+end_src
+
+#+RESULTS:
+: 25
+
+** DONE Exercise 1.4.
+CLOSED: [2016-11-28 Mon 12:47]
+Observe that our model of evaluation allows for combinations whose operators are compound expressions. Use this observation to describe the behavior of the following procedure:
+#+begin_src scheme :tangle yes
+(define (a-plus-abs-b a b)
+  ((if (> b 0) + -) a b))
+
+(a-plus-abs-b 9 -1)
+#+end_src
+
+#+RESULTS:
+: 10
+
+;; Expected result: 
+10
+
+** DONE Exercise 1.5.
+CLOSED: [2016-11-28 Mon 12:46]
+Ben Bitdiddle has invented a test to determine whether the interpreter he is faced with is using applicative-order evaluation or normal-order evaluation. He defines the following two procedures:
+
+(define (p) (p))
+
+(define (test x y)
+  (if (= x 0)
+      0
+      y))
+
+Then he evaluates the expression
+
+(test 0 (p))
+
+What behavior will Ben observe with an interpreter that uses applicative-order evaluation? What behavior will he observe with an interpreter that uses normal-order evaluation? Explain your answer. (Assume that the evaluation rule for the special form if is the same whether the interpreter is using normal or applicative order: The predicate expression is evaluated first, and the result determines whether to evaluate the consequent or the alternative expression.)
+
+*** Answer
+Using applicative-order interpretation the code will return 0, whereas normal-order application will never finish running
+
+** DONE Exercise 1.6.
+CLOSED: [2016-11-28 Mon 12:46]
+Alyssa P. Hacker doesn't see why if needs to be provided as a special form. ``Why can't I just define it as an ordinary procedure in terms of cond?'' she asks. Alyssa's friend Eva Lu Ator claims this can indeed be done, and she defines a new version of if:
+
+(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+
+Eva demonstrates the program for Alyssa:
+
+(new-if (= 2 3) 0 5)
+5
+
+(new-if (= 1 1) 0 5)
+0
+
+Delighted, Alyssa uses new-if to rewrite the square-root program:
+
+(define (sqrt-iter guess x)
+  (new-if (good-enough? guess x)
+          guess
+          (sqrt-iter (improve guess x)
+                    x)))
+
+(define (improve guess x)
+  (average guess (/ x guess)))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+
+What happens when Alyssa attempts to use this to compute square roots? Explain.
+
+*** Answer
+The code will run forever. The problem is that the sqrt-iter will be evaluated due to applicative-order evaluation. The if statement is a special form that only evaluates one of its results, where as a function will always evaluate its arguments prior to the call.
+** DONE Exercise 1.7.
+CLOSED: [2016-11-28 Mon 12:46]
+
+
+The good-enough? test used in computing square roots will not be very effective for finding the square roots of very small numbers. Also, in real computers, arithmetic operations are almost always performed with limited precision. This makes our test inadequate for very large numbers. Explain these statements, with examples showing how the test fails for small and large numbers. An alternative strategy for implementing good-enough? is to watch how guess changes from one iteration to the next and to stop when the change is a very small fraction of the guess. Design a square-root procedure that uses this kind of end test. Does this work better for small and large numbers?
+
+
+
+#+begin_src scheme :tangle yes
+(define (good-enough-mod? guess old-guess) ( < (abs (- guess old-guess)) (/ guess 1000.0)))
+(f 0)
+#+end_src
+
+Unable to finish on my laptop. The code is straightforward and I wrote it. The use of this new sqrt method is superior for large and small numbers. For certain numbers, the use of good-enough-mod actually prevents the cpu from running forever due to limited precision never advancing the guess.
+
+** DONE Exercise 1.11.
+CLOSED: [2016-11-28 Mon 12:46]
+  A function f is defined by the rule that f(n) = n if n<3 and f(n) = f(n - 1) + 2f(n - 2) + 3f(n - 3) if n>= 3. Write a procedure that computes f by means of a recursive process. Write a procedure that computes f by means of an iterative process.
+
+f(4) = 3 + 2 + 1
+f(5) = 6 + 3 + 2
+
+#+begin_src scheme :tangle yes
+(define (f n)
+  (define (f-iter current n-1 n-2 n-3 up-to)
+    (if (> current up-to)
+        n-1
+        (f-iter (+ current 1) (+ n-1 n-2 n-3) n-1 n-2 up-to)))
+
+  (cond ((< n 3) n)
+        ((>= n 3) (f-iter 4 3 2 1 n) )))
+(f 7)
+#+end_src
+
+#+RESULTS:
+: 68
+
+** DONE Exercise 1.12.
+CLOSED: [2016-11-28 Mon 13:54]
+  The following pattern of numbers is called Pascal's triangle.
+
+      1 
+    1 1
+    1 2 1
+  1 3 3 1
+  1 4 6 4 1
+...........
+
+p(5, 4) = p(4,3) + p(4, 4) 
+p(5, 2) = p(4,1) + p(4, 2) 
+p(5,1) = p(4,1)
+p(5,5) = p(4,5)
+
+The numbers at the edge of the triangle are all 1, and each number inside the triangle is the sum of the two numbers above it.35 Write a procedure that computes elements of Pascal's triangle by means of a recursive process.
+
+#+begin_src scheme :tangle yes
+  ;;assumes valid input
+  (define (pascals-triangle level n-from-l)
+    ;(define op (if 
+    ;(= (remainder n-from-l 2) 0)  + -))
+    (cond  ((and (= level 1) (= n-from-l 1)) 1)
+          ((< n-from-l 1) 0) ; left of first triangular value
+          ((> n-from-l level) 0) ; right of last triangular value
+          (else (+ (pascals-triangle (- level 1 ) n-from-l) (pascals-triangle (- level 1) (- n-from-l 1))))
+          )
+          )
+
+  (pascals-triangle 5 3)
+    #+end_src
+
+#+RESULTS:
+: 6
+
+** DONE Exercise 1.16.
+CLOSED: [2016-11-28 Mon 15:24]
+Design a procedure that evolves an iterative exponentiation process that uses successive squaring and uses a logarithmic number of steps, as does fast-expt. (Hint: Using the observation that b^(n/2)^2 = (b^2)^n/2, keep, along with the exponent n and the base b, an additional state variable a, and define the state transformation in such a way that the product a*b^n is unchanged from state to state. At the beginning of the process a is taken to be 1, and the answer is given by the value of a at the end of the process. In general, the technique of defining an invariant quantity that remains unchanged from state to state is a powerful way to think about the design of iterative algorithms.)
+#+begin_src scheme :tangle yes
+;; useful for checking whether our function is indeed logarithmic
+(define (display-and-return disp ret)
+  (display "number of multiplications- ")
+  (display disp)
+  (display "\n")
+  ret) 
+
+  (define (fast-exp base exp)
+    (define (iter-exp base exp a steps)
+      (cond
+      ((= exp 0) (display-and-return steps a))
+      ((even? exp) (iter-exp (* base  base) (/ exp 2) a (+ steps 1)))
+      (else (iter-exp base (- exp 1) (* a base) (+ steps 1)))
+      )
+      )
+    (iter-exp base exp 1 0))
+(fast-exp 2 8)
+#+end_src
+
+#+RESULTS:
+: 256
+
+** DONE Exercise 1.17.
+CLOSED: [2016-11-28 Mon 15:42]
+The exponentiation algorithms in this section are based on performing exponentiation by means of repeated multiplication. In a similar way, one can perform integer multiplication by means of repeated addition. The following multiplication procedure (in which it is assumed that our language can only add, not multiply) is analogous to the expt procedure:
+
+(define (* a b)
+(if (= b 0)
+0
+(+ a (* a (- b 1)))))
+
+This algorithm takes a number of steps that is linear in b. Now suppose we include, together with addition, operations double, which doubles an integer, and halve, which divides an (even) integer by 2. Using these, design a multiplication procedure analogous to fast-expt that uses a logarithmic number of steps.
+
+#+begin_src scheme :tangle yes
+  (define (* a b)
+    (define (double val) (+ val val))
+    (define (halve val) (/ val 2))
+    (cond
+    ((= b 0) 0)
+    ((even? b) (* (double a) (halve b)))
+    (else (+ a (* a (- b 1))))
+    )
+    )
+  (* 4 1000)
+#+end_src
+
+#+RESULTS:
+: 4000
+
+** DONE Exercise 1.19.
+CLOSED: [2016-11-28 Mon 17:08]
+There is a clever algorithm for computing the Fibonacci numbers in a logarithmic number of steps. Recall the transformation of the state variables a and b in the fib-iter process of section 1.2.2: a <- a + b and b <- a. Call this transformation T, and observe that applying T over and over again n times, starting with 1 and 0, produces the pair Fib(n + 1) and Fib(n). In other words, the Fibonacci numbers are produced by applying T(n), the nth power of the transformation T, starting with the pair (1,0). Now consider T to be the special case of p = 0 and q = 1 in a family of transformations T_pq, where T_pq transforms the pair (a,b) according to a <- b*q + a*q + a*p and b <- b*p + a*q. 
+
+Show that if we apply such a transformation T_pq twice, the effect is the same as using a single transformation T_p'q' of the same form, and compute p' and q' in terms of p and q. This gives us an explicit way to square these transformations, and thus we can compute T_n using successive squaring, as in the fast-expt procedure. Put this all together to complete the following procedure, which runs in a logarithmic number of steps
+
+Ta = (b*q + a*q + a*p) 
+Tb = (b*p + a*q)
+
+TTa = (b*p + a*q)*q + (b*q + a*q + a*p)*q + (b*q + a*q + a*p)*p 
+TTa = 2b*p*q + 2a*q^2 + b*q^2 + 2a*q*p + a*p^2 
+TTa = b(2pq + q^2) + a(2qp + 2q^2 + p^2)
+
+TTb = b*p^2 + a*q*p + b*q^2 + a*q^2 + a*p*q
+TTb = b(p^2 + q^2) + a(q^2 + 2pq)
+
+Looking at these forms, where
+a <- b(q') + a(q'+p')
+and 
+b <- b(p') + a(q'), it's easy to see that the values of p' and q' are:
+
+p' = p^2 + q^2
+q' = q^2 + 2pq
+
+#+begin_src scheme :tangle yes 
+(define (square x) (* x x))
+(define (fib n)
+(fib-iter 1 0 0 1 n))
+
+(define (fib-iter a b p q count)
+(cond ((= count 0) b)
+((even? count)
+(fib-iter a
+b
+(+ (square p) (square q))     ; compute p'       
+(+ (square q) (* 2 p q))      ; compute q'
+(/ count 2)))
+(else (fib-iter (+ (* b q) (* a q) (* a p))
+(+ (* b p) (* a q))
+p
+q
+(- count 1)))))
+(fib 7)
+#+end_src
+
+#+RESULTS:
+: 13
+
+** DONE Exercise 1.29.
+CLOSED: [2016-11-28 Mon 17:57]
+Simpson's Rule is a more accurate method of numerical integration than the method illustrated above. Using Simpson's Rule, the integral of a function f between a and b is approximated as
+
+
+where h = (b - a)/n, for some even integer n, and yk = f(a + kh). (Increasing n increases the accuracy of the approximation.) Define a procedure that takes as arguments f, a, b, and n and returns the value of the integral, computed using Simpson's Rule. Use your procedure to integrate cube between 0 and 1 (with n = 100 and n = 1000), and compare the results to those of the integral procedure shown above.
+
+#+begin_src scheme :tangle yes
+  (define (cube x) (* x x x))
+  (define (simpson-integration func a b n)
+    (define (simpson-rec func a b n k)
+      (let ((h
+            (/ (- b a )n))
+            (coeff (cond
+                    ((or (= k 0) (= k n)) 1)
+                    ((even? k) 2)
+                    (else 4)
+                    ))
+            )
+        (if (= k n)
+            (* coeff (func (+ a (* k h))) )
+            ( + (* coeff (func (+ a (* k h))) ) (simpson-rec func a b n (+ k 1)))
+            )
+        )
+      )
+    (* (/ (/ (- b a ) n) 3) (simpson-rec func a b n 0))
+    )
+  (simpson-integration cube 0.0 1 100.0)
+#+end_src
+
+#+RESULTS:
+: 0.24999999999999992
+
+** DONE Exercise 1.30.
+CLOSED: [2016-11-28 Mon 18:33]
+The sum procedure above generates a linear recursion. The procedure can be rewritten so that the sum is performed iteratively. Show how to do this by filling in the missing expressions in the following definition:
+
+// should yield 3025
+(sum cube 1 inc 10) 
+
+
+
+#+begin_src scheme :tangle yes 
+  (define (cube x) (* x x x))
+  (define (inc x) (+ x 1))
+  (define (sum term a next b)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (+ (term a) result))))
+    (iter a 0))
+  (sum cube 1 inc 10) 
+#+end_src
+
+#+RESULTS:
+: 3025
+
+** DONE Exercise 1.37.
+CLOSED: [2016-11-28 Mon 20:22]
+*** a) Recursive
+An infinite continued fraction is an expression of the form
+f = ( N_1 / (D_1 + N2 / ( D2 + N3 / (D3 + ... 
+As an example, one can show that the infinite continued fraction expansion with the N_i and the D_i all equal to 1 produces 1/\, where  is the golden ratio (described in section 1.2.2). One way to approximate an infinite continued fraction is to truncate the expansion after a given number of terms. Such a truncation -- a so-called k-term finite continued fraction -- has the form
+
+Suppose that n and d are procedures of one argument (the term index i) that return the Ni and Di of the terms of the continued fraction. Define a procedure cont-frac such that evaluating (cont-frac n d k) computes the value of the k-term finite continued fraction. Check your procedure by approximating 1 / \phi using
+
+(cont-frac (lambda (i) 1.0)
+(lambda (i) 1.0)
+k)
+
+for successive values of k. How large must you make k in order to get an approximation that is accurate to 4 decimal places?
+
+Answer: 10
+
+#+begin_src scheme :tangle yes
+  (define (cont-frac N-func D-func k)
+    (define (cont-frac-rec i)
+      (if (= i k)
+          (/ (N-func i) (D-func i))
+          (/ (N-func i) (+ (D-func i) (cont-frac-rec (+ i 1))))
+          )
+    )
+    (cont-frac-rec 1)
+    )
+
+  ;; should yield golden ratio
+  (cont-frac (lambda (i) 1.0)
+  (lambda (i) 1.0)
+  11)
+#+end_src
+#+RESULTS:
+: 0.6180555555555556
+
+*** b) Iterative
+If your cont-frac procedure generates a recursive process, write one that generates an iterative process. If it generates an iterative process, write one that generates a recursive process.
+
+#+begin_src scheme :tangle yes
+  (define (cont-frac N-func D-func k)
+    (define (cont-frac-iter i denominator)
+      (cond ((= i 0) denominator)
+            ((= i k)
+            (cont-frac-iter
+              (- i 1)
+              (/ (N-func i) (D-func i))))
+            (else
+            (cont-frac-iter
+              (- i 1)
+              (/ (N-func i)
+              (+ (D-func i) denominator))))
+            )
+            )
+      (cont-frac-iter k 0)
+      )
+
+    ;; should yield golden ratio
+    (cont-frac (lambda (i) 1.0)
+              (lambda (i) 1.0)
+              11)
+#+end_src
+#+RESULTS:
+: 0.6180555555555556
+
+** DONE Exercise 1.42.
+CLOSED: [2016-11-28 Mon 20:31]
+Let f and g be two one-argument functions. The composition f after g is defined to be the function x -> f(g(x)). Define a procedure compose that implements composition. For example, if inc is a procedure that adds 1 to its argument,
+
+#+begin_src scheme :tangle yes
+;; expected result:  49
+(define (inc x) (+ x 1))
+(define (square x) (* x x))
+(define (compose f g) 
+(lambda (x) (f (g x)))
+)
+((compose square inc) 6)
+#+end_src
+
+#+RESULTS:
+: 49
+
+** DONE Exercise 1.46.
+CLOSED: [2016-11-28 Mon 21:28]
+Several of the numerical methods described in this chapter are instances of an extremely general computational strategy known as iterative improvement. Iterative improvement says that, to compute something, we start with an initial guess for the answer, test if the guess is good enough, and otherwise improve the guess and continue the process using the improved guess as the new guess. Write a procedure iterative-improve that takes two procedures as arguments: a method for telling whether a guess is good enough and a method for improving a guess. Iterative-improve should return as its value a procedure that takes a guess as argument and keeps improving the guess until it is good enough. Rewrite the sqrt procedure of section 1.1.7 and the fixed-point procedure of section 1.3.3 in terms of iterative-improve.
+
+#+begin_src scheme :tangle yes 
+(define (iterative-improve close-enough-func improve-func)
+  (define (iterative-improve-filled guess x)
+    (if (close-enough-func guess x)
+        guess
+        (iterative-improve-filled (improve-func guess x) x)
+        )
+    )
+  iterative-improve-filled
+  )
+
+(define (square x) (* x x))
+
+; pulled from sicp
+(define (good-enough? guess x)
+  (< (abs (- (square guess) x)) 0.001))
+
+(define (sqrt-improve guess x)
+  (average guess (/ x guess)))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+(define tolerance 0.00001)
+
+(define (fp-close-enough? guess f)
+  (< (abs (- guess (f guess))) tolerance))
+
+(define (fp-improve guess f)
+  (f guess))
+
+(define (fixed-point f first-guess)
+  ((iterative-improve fp-close-enough? fp-improve) first-guess f))
+
+(define (sqrt x)
+  ((iterative-improve good-enough? sqrt-improve) 1.0 x))
+
+(sqrt 4)
+(fixed-point cos 1.0)
+  #+end_src
+
+#+RESULTS:
+: 0.7390893414033927
+
+
+
+
+* Ch 2
+* Start of 2.1
+** DONE Exercise 2.4.
+CLOSED: [2016-11-29 Tue 21:17]
+Here is an alternative procedural representation of pairs. For this representation, verify that (car (cons x y)) yields x for any objects x and y.
+
+What is the corresponding definition of cdr? (Hint: To verify that this works, make use of the substitution model of section 1.1.5.)
+#+begin_src scheme :tangle yes
+
+(define (cons x y)
+  (lambda (m) (m x y)))
+
+(define (car z)
+  (z (lambda (p q) p)))
+
+(define (cdr z)
+  (z (lambda (p q) q)))
+
+;; Expected result: 
+(cdr (cons 1 2))
+#+end_src
+
+** TODO Exercise 2.6.  
+In case representing pairs as procedures wasn't mind-boggling enough, consider that, in a language that can manipulate procedures, we can get by without numbers (at least insofar as nonnegative integers are concerned) by implementing 0 and the operation of adding 1 as
+
+(define zero (lambda (f) (lambda (x) x)))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+This representation is known as Church numerals, after its inventor, Alonzo Church, the logician who invented the  calculus.
+
+Define one and two directly (not in terms of zero and add-1). (Hint: Use substitution to evaluate (add-1 zero)). Give a direct definition of the addition procedure + (not in terms of repeated application of add-1).
+
+** TODO 2.1.4  Extended Exercise: Interval Arithmetic
+
+Alyssa P. Hacker is designing a system to help people solve engineering problems. One feature she wants to provide in her system is the ability to manipulate inexact quantities (such as measured parameters of physical devices) with known precision, so that when computations are done with such approximate quantities the results will be numbers of known precision.
+
+Electrical engineers will be using Alyssa's system to compute electrical quantities. It is sometimes necessary for them to compute the value of a parallel equivalent resistance Rp of two resistors R1 and R2 using the formula
+
+R_p =  1 / ((1/R_1) + (1/R_2))
+
+Resistance values are usually known only up to some tolerance guaranteed by the manufacturer of the resistor. For example, if you buy a resistor labeled ``6.8 ohms with 10% tolerance'' you can only be sure that the resistor has a resistance between 6.8 - 0.68 = 6.12 and 6.8 + 0.68 = 7.48 ohms. Thus, if you have a 6.8-ohm 10% resistor in parallel with a 4.7-ohm 5% resistor, the resistance of the combination can range from about 2.58 ohms (if the two resistors are at the lower bounds) to about 2.97 ohms (if the two resistors are at the upper bounds).
+
+Alyssa's idea is to implement ``interval arithmetic'' as a set of arithmetic operations for combining ``intervals'' (objects that represent the range of possible values of an inexact quantity). The result of adding, subtracting, multiplying, or dividing two intervals is itself an interval, representing the range of the result.
+
+Alyssa postulates the existence of an abstract object called an ``interval'' that has two endpoints: a lower bound and an upper bound. She also presumes that, given the endpoints of an interval, she can construct the interval using the data constructor make-interval. Alyssa first writes a procedure for adding two intervals. She reasons that the minimum value the sum could be is the sum of the two lower bounds and the maximum value it could be is the sum of the two upper bounds:
+
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+
+Alyssa also works out the product of two intervals by finding the minimum and the maximum of the products of the bounds and using them as the bounds of the resulting interval. (Min and max are primitives that find the minimum or maximum of any number of arguments.)
+
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+
+To divide two intervals, Alyssa multiplies the first by the reciprocal of the second. Note that the bounds of the reciprocal interval are the reciprocal of the upper bound and the reciprocal of the lower bound, in that order.
+
+(define (div-interval x y)
+  (mul-interval x 
+                (make-interval (/ 1.0 (upper-bound y))
+                               (/ 1.0 (lower-bound y)))))
+*** TODO Exercise 2.7.
+Alyssa's program is incomplete because she has not specified the implementation of the interval abstraction. Here is a definition of the interval constructor:
+
+(define (make-interval a b) (cons a b))
+
+Define selectors upper-bound and lower-bound to complete the implementation.
+
+*** TODO Exercise 2.8.
+Using reasoning analogous to Alyssa's, describe how the difference of two intervals may be computed. Define a corresponding subtraction procedure, called sub-interval.
+
+*** TODO Exercise 2.9.
+The width of an interval is half of the difference between its upper and lower bounds. The width is a measure of the uncertainty of the number specified by the interval. For some arithmetic operations the width of the result of combining two intervals is a function only of the widths of the argument intervals, whereas for others the width of the combination is not a function of the widths of the argument intervals. Show that the width of the sum (or difference) of two intervals is a function only of the widths of the intervals being added (or subtracted). Give examples to show that this is not true for multiplication or division.
+
+*** TODO Exercise 2.10.
+Ben Bitdiddle, an expert systems programmer, looks over Alyssa's shoulder and comments that it is not clear what it means to divide by an interval that spans zero. Modify Alyssa's code to check for this condition and to signal an error if it occurs.
+
+*** TODO Exercise 2.11.
+In passing, Ben also cryptically comments: ``By testing the signs of the endpoints of the intervals, it is possible to break mul-interval into nine cases, only one of which requires more than two multiplications.'' Rewrite this procedure using Ben's suggestion.
+
+After debugging her program, Alyssa shows it to a potential user, who complains that her program solves the wrong problem. He wants a program that can deal with numbers represented as a center value and an additive tolerance; for example, he wants to work with intervals such as 3.5± 0.15 rather than [3.35, 3.65]. Alyssa returns to her desk and fixes this problem by supplying an alternate constructor and alternate selectors:
+
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+Unfortunately, most of Alyssa's users are engineers. Real engineering situations usually involve measurements with only a small uncertainty, measured as the ratio of the width of the interval to the midpoint of the interval. Engineers usually specify percentage tolerances on the parameters of devices, as in the resistor specifications given earlier.
+
+*** TODO Exercise 2.12.
+Define a constructor make-center-percent that takes a center and a percentage tolerance and produces the desired interval. You must also define a selector percent that produces the percentage tolerance for a given interval. The center selector is the same as the one shown above.
+
+*** TODO Exercise 2.13.
+Show that under the assumption of small percentage tolerances there is a simple formula for the approximate percentage tolerance of the product of two intervals in terms of the tolerances of the factors. You may simplify the problem by assuming that all numbers are positive.
+
+After considerable work, Alyssa P. Hacker delivers her finished system. Several years later, after she has forgotten all about it, she gets a frenzied call from an irate user, Lem E. Tweakit. It seems that Lem has noticed that the formula for parallel resistors can be written in two algebraically equivalent ways:
+
+(R_1 * R_2) / (R_1 + R_2)
+
+and
+
+1 / ((1/R_1) + (1/R_2))
+
+
+He has written the following two programs, each of which computes the parallel-resistors formula differently:
+
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+                (add-interval r1 r2)))
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1))) 
+    (div-interval one
+                  (add-interval (div-interval one r1)
+                                (div-interval one r2)))))
+
+Lem complains that Alyssa's program gives different answers for the two ways of computing. This is a serious complaint.
+
+*** TODO Exercise 2.14.
+Demonstrate that Lem is right. Investigate the behavior of the system on a variety of arithmetic expressions. Make some intervals A and B, and use them in computing the expressions A/A and A/B. You will get the most insight by using intervals whose width is a small percentage of the center value. Examine the results of the computation in center-percent form (see exercise 2.12).
+
+*** TODO Exercise 2.15.
+Eva Lu Ator, another user, has also noticed the different intervals computed by different but algebraically equivalent expressions. She says that a formula to compute with intervals using Alyssa's system will produce tighter error bounds if it can be written in such a form that no variable that represents an uncertain number is repeated. Thus, she says, par2 is a ``better'' program for parallel resistances than par1. Is she right? Why?
+
+*** TODO Exercise 2.16.
+Explain, in general, why equivalent algebraic expressions may lead to different answers. Can you devise an interval-arithmetic package that does not have this shortcoming, or is this task impossible? (Warning: This problem is very difficult.)
+
+
+* Start of 2.2
+** DONE Exercise 2.17.
+   CLOSED: [2016-11-29 Tue 22:23]
+   Define a procedure last-pair that returns the list that contains only the last element of a given (nonempty) list:
+   
+#+begin_src scheme :tangle yes 
+  (define (last-pair n)
+  (cond ((null? n ) '())
+         ((null? (cdr n)) n)
+         (else (last-pair (cdr n)))
+         )
+  )
+  ;; Expected result: (34)
+  (last-pair (list 23 72 149 34))
+#+end_src
+
+#+RESULTS:
+: (34)
+
+** TODO Exercise 2.18.
+Define a procedure reverse that takes a list as argument and returns a list of the same elements in reverse order:
+
+(reverse (list 1 4 9 16 25))
+(25 16 9 4 1)
+
+** TODO Exercise 2.20.
+The procedures +, *, and list take arbitrary numbers of arguments. One way to define such procedures is to use define with dotted-tail notation. In a procedure definition, a parameter list that has a dot before the last parameter name indicates that, when the procedure is called, the initial parameters (if any) will have as values the initial arguments, as usual, but the final parameter's value will be a list of any remaining arguments. For instance, given the definition
+
+(define (f x y . z) <body>)
+
+the procedure f can be called with two or more arguments. If we evaluate
+
+(f 1 2 3 4 5 6)
+
+then in the body of f, x will be 1, y will be 2, and z will be the list (3 4 5 6). Given the definition
+
+(define (g . w) <body>)
+
+the procedure g can be called with zero or more arguments. If we evaluate
+
+(g 1 2 3 4 5 6)
+
+then in the body of g, w will be the list (1 2 3 4 5 6).11
+
+Use this notation to write a procedure same-parity that takes one or more integers and returns a list of all the arguments that have the same even-odd parity as the first argument. For example,
+
+(same-parity 1 2 3 4 5 6 7)
+(1 3 5 7)
+
+(same-parity 2 3 4 5 6 7)
+(2 4 6)
+
+** TODO Exercise 2.23.
+The procedure for-each is similar to map. It takes as arguments a procedure and a list of elements. However, rather than forming a list of the results, for-each just applies the procedure to each of the elements in turn, from left to right. The values returned by applying the procedure to the elements are not used at all -- for-each is used with procedures that perform an action, such as printing. For example,
+
+(for-each (lambda (x) (newline) (display x))
+          (list 57 321 88))
+57
+321
+88
+
+The value returned by the call to for-each (not illustrated above) can be something arbitrary, such as true. Give an implementation of for-each.
+
+** DONE Exercise 2.25.
+   CLOSED: [2016-11-29 Tue 23:20]
+Give combinations of cars and cdrs that will pick 7 from each of the following lists:
+'(1 3 (5 7) 9)
+' ((7))
+'(1 (2 (3 (4 (5 (6 7))))))
+
+*** Answer 
+#+begin_src scheme :tangle yes
+(car (cdr (car ( cdr ( cdr 
+'(1 3 (5 7) 9)
+)))))
+
+(car(car
+' ((7))
+))
+
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr
+'(1 (2 (3 (4 (5 (6 7))))))
+))))))))))))
+#+end_src
+
+#+RESULTS:
+: 7
+
+** DONE Exercise 2.26.
+   CLOSED: [2016-11-29 Tue 23:19]
+Suppose we define x and y to be two lists:
+
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+
+What result is printed by the interpreter in response to evaluating each of the following expressions:
+
+(append x y)
+
+(cons x y)
+
+(list x y)
+
+
+*** Answers
+(1 2 3 4 5 6)
+*Note  to self.* This is because cons takes the first element to be the first thing in the list, and the second element(cdr) to be a list representing the rest of the sequence
+((1 2 3) 4 5 6)  
+((1 2 3) (4 5 6))
+
+** TODO Exercise 2.27.
+Modify your reverse procedure of exercise 2.18 to produce a deep-reverse procedure that takes a list as argument and returns as its value the list with its elements reversed and with all sublists deep-reversed as well. For example,
+
+(define x (list (list 1 2) (list 3 4)))
+
+x
+((1 2) (3 4))
+
+(reverse x)
+((3 4) (1 2))
+
+(deep-reverse x)
+((4 3) (2 1))
+
+** TODO Exercise 2.28.
+Write a procedure fringe that takes as argument a tree (represented as a list) and returns a list whose elements are all the leaves of the tree arranged in left-to-right order. For example,
+
+(define x (list (list 1 2) (list 3 4)))
+
+(fringe x)
+(1 2 3 4)
+
+(fringe (list x x))
+(1 2 3 4 1 2 3 4)
+
+** TODO Exercise 2.30.
+Define a procedure square-tree analogous to the square-list procedure of exercise 2.21. That is, square-list should behave as follows:
+
+(square-tree
+ (list 1
+       (list 2 (list 3 4) 5)
+       (list 6 7)))
+(1 (4 (9 16) 25) (36 49))
+
+Define square-tree both directly (i.e., without using any higher-order procedures) and also by using map and recursion.
+
+** TODO Exercise 2.31.
+Abstract your answer to exercise 2.30 to produce a procedure tree-map with the property that square-tree could be defined as
+
+(define (square-tree tree) (tree-map square tree))
+
+** TODO Exercise 2.32.
+We can represent a set as a list of distinct elements, and we can represent the set of all subsets of the set as a list of lists. For example, if the set is (1 2 3), then the set of all subsets is (() (3) (2) (2 3) (1) (1 3) (1 2) (1 2 3)). Complete the following definition of a procedure that generates the set of subsets of a set and give a clear explanation of why it works:
+
+(define (subsets s)
+  (if (null? s)
+      (list nil)
+      (let ((rest (subsets (cdr s))))
+        (append rest (map <??> rest)))))
+
+** TODO Exercise 2.33.
+Fill in the missing expressions to complete the following definitions of some basic list-manipulation operations as accumulations:
+
+(define (map p sequence)
+  (accumulate (lambda (x y) <??>) nil sequence))
+(define (append seq1 seq2)
+  (accumulate cons <??> <??>))
+(define (length sequence)
+  (accumulate <??> 0 sequence))
+
+** TODO Exercise 2.34.
+Evaluating a polynomial in x at a given value of x can be formulated as an accumulation. We evaluate the polynomial
+
+
+using a well-known algorithm called Horner's rule, which structures the computation as
+
+
+In other words, we start with an, multiply by x, add an-1, multiply by x, and so on, until we reach a0.16 Fill in the following template to produce a procedure that evaluates a polynomial using Horner's rule. Assume that the coefficients of the polynomial are arranged in a sequence, from a0 through an.
+
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms) <??>)
+              0
+              coefficient-sequence))
+
+For example, to compute 1 + 3x + 5x3 + x5 at x = 2 you would evaluate
+
+(horner-eval 2 (list 1 3 0 5 0 1))
+** TODO Exercise 2.35.
+Redefine count-leaves from section 2.2.2 as an accumulation:
+
+(define (count-leaves t)
+  (accumulate <??> <??> (map <??> <??>)))
+
+** TODO Exercise 2.37.
+Suppose we represent vectors v = (vi) as sequences of numbers, and matrices m = (mij) as sequences of vectors (the rows of the matrix). For example, the matrix
+
+
+is represented as the sequence ((1 2 3 4) (4 5 6 6) (6 7 8 9)). With this representation, we can use sequence operations to concisely express the basic matrix and vector operations. These operations (which are described in any book on matrix algebra) are the following:
+
+
+We can define the dot product as17
+
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+Fill in the missing expressions in the following procedures for computing the other matrix operations. (The procedure accumulate-n is defined in exercise 2.36.)
+
+(define (matrix-*-vector m v)
+  (map <??> m))
+(define (transpose mat)
+  (accumulate-n <??> <??> mat))
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map <??> m)))
+
+** DONE Exercise 2.38.
+   CLOSED: [2016-11-29 Tue 22:47]
+The accumulate procedure is also known as fold-right, because it combines the first element of the sequence with the result of combining all the elements to the right. There is also a fold-left, which is similar to fold-right, except that it combines elements working in the opposite direction:
+
+What are the values of
+
+(fold-right / 1 (list 1 2 3))
+(fold-left / 1 (list 1 2 3))
+(fold-right list nil (list 1 2 3))
+(fold-left list nil (list 1 2 3))
+
+Give a property that op should satisfy to guarantee that fold-right and fold-left will produce the same values for any sequence.
+
+*** Answer:
+    The property is "Commutative".
+
+    Note the difference between fold-left and fold-right is in the placement of arguments following operator
+#+begin_src scheme :tangle yes
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest)) 
+              (cdr rest))))
+  (iter initial sequence))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)   
+          (accumulate op initial (cdr sequence)))))  
+#+end_src
+
+
+** TODO Exercise 2.39.
+Complete the following definitions of reverse (exercise 2.18) in terms of fold-right and fold-left from exercise 2.38:
+
+(define (reverse sequence)
+  (fold-right (lambda (x y) <??>) nil sequence))
+(define (reverse sequence)
+  (fold-left (lambda (x y) <??>) nil sequence))
+
+** TODO Exercise 2.41.
+
+  Write a procedure to find all ordered triples of distinct positive integers i, j, and k less than or equal to a given integer n that sum to a given integer s.
+
+
+* Start of 2.3
+** Exercise 2.53.
+What would the interpreter print in response to evaluating each of the following expressions?
+
+(list 'a 'b 'c)
+
+(list (list 'george))
+(cdr '((x1 x2) (y1 y2)))
+
+(cadr '((x1 x2) (y1 y2)))
+(pair? (car '(a short list)))
+(memq 'red '((red shoes) (blue socks)))
+
+(memq 'red '(red shoes blue socks))
+
+** Exercise 2.54.
+Two lists are said to be equal? if they contain equal elements arranged in the same order. For example,
+
+(equal? '(this is a list) '(this is a list))
+
+is true, but
+
+(equal? '(this is a list) '(this (is a) list))
+
+is false. To be more precise, we can define equal? recursively in terms of the basic eq? equality of symbols by saying that a and b are equal? if they are both symbols and the symbols are eq?, or if they are both lists such that (car a) is equal? to (car b) and (cdr a) is equal? to (cdr b). Using this idea, implement equal? as a procedure.36
+
+** Exercise 2.55.
+Eva Lu Ator types to the interpreter the expression
+
+(car ''abracadabra)
+
+To her surprise, the interpreter prints back quote. Explain.
+
+** Exercise 2.56.
+Show how to extend the basic differentiator to handle more kinds of expressions. For instance, implement the differentiation rule
+
+
+by adding a new clause to the deriv program and defining appropriate procedures exponentiation?, base, exponent, and make-exponentiation. (You may use the symbol ** to denote exponentiation.) Build in the rules that anything raised to the power 0 is 1 and anything raised to the power 1 is the thing itself.
+
+Exercise 2.57.  Extend the differentiation program to handle sums and products of arbitrary numbers of (two or more) terms. Then the last example above could be expressed as
+
+(deriv '(* x y (+ x 3)) 'x)
+
+Try to do this by changing only the representation for sums and products, without changing the deriv procedure at all. For example, the addend of a sum would be the first term, and the augend would be the sum of the rest of the terms.
+
+Exercise 2.58.  Suppose we want to modify the differentiation program so that it works with ordinary mathematical notation, in which + and * are infix rather than prefix operators. Since the differentiation program is defined in terms of abstract data, we can modify it to work with different representations of expressions solely by changing the predicates, selectors, and constructors that define the representation of the algebraic expressions on which the differentiator is to operate.
+
+a. Show how to do this in order to differentiate algebraic expressions presented in infix form, such as (x + (3 * (x + (y + 2)))). To simplify the task, assume that + and * always take two arguments and that expressions are fully parenthesized.
+
+b. The problem becomes substantially harder if we allow standard algebraic notation, such as (x + 3 * (x + y + 2)), which drops unnecessary parentheses and assumes that multiplication is done before addition. Can you design appropriate predicates, selectors, and constructors for this notation such that our derivative program still works?
+
+** Exercise 2.59.
+Implement the union-set operation for the unordered-list representation of sets.
+
+** Exercise 2.60.
+We specified that a set would be represented as a list with no duplicates. Now suppose we allow duplicates. For instance, the set {1,2,3} could be represented as the list (2 3 2 1 3 2 2). Design procedures element-of-set?, adjoin-set, union-set, and intersection-set that operate on this representation. How does the efficiency of each compare with the corresponding procedure for the non-duplicate representation? Are there applications for which you would use this representation in preference to the non-duplicate one?
+
+** Exercise 2.64.
+The following procedure list->tree converts an ordered list to a balanced binary tree. The helper procedure partial-tree takes as arguments an integer n and list of at least n elements and constructs a balanced tree containing the first n elements of the list. The result returned by partial-tree is a pair (formed with cons) whose car is the constructed tree and whose cdr is the list of elements not included in the tree.
+
+(define (list->tree elements)
+  (car (partial-tree elements (length elements))))
+
+(define (partial-tree elts n)
+  (if (= n 0)
+      (cons '() elts)
+      (let ((left-size (quotient (- n 1) 2)))
+        (let ((left-result (partial-tree elts left-size)))
+          (let ((left-tree (car left-result))
+                (non-left-elts (cdr left-result))
+                (right-size (- n (+ left-size 1))))
+            (let ((this-entry (car non-left-elts))
+                  (right-result (partial-tree (cdr non-left-elts)
+                                              right-size)))
+              (let ((right-tree (car right-result))
+                    (remaining-elts (cdr right-result)))
+                (cons (make-tree this-entry left-tree right-tree)
+                      remaining-elts))))))))
+
+a. Write a short paragraph explaining as clearly as you can how partial-tree works. Draw the tree produced by list->tree for the list (1 3 5 7 9 11).
+
+b. What is the order of growth in the number of steps required by list->tree to convert a list of n elements?
+
+** Exercise 2.67.
+Define an encoding tree and a sample message:
+
+(define sample-tree
+  (make-code-tree (make-leaf 'A 4)
+                  (make-code-tree
+                   (make-leaf 'B 2)
+                   (make-code-tree (make-leaf 'D 1)
+                                   (make-leaf 'C 1)))))
+
+(define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
+
+Use the decode procedure to decode the message, and give the result.
+
+Exercise 2.68.  The encode procedure takes as arguments a message and a tree and produces the list of bits that gives the encoded message.
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+      (append (encode-symbol (car message) tree)
+              (encode (cdr message) tree))))
+
+Encode-symbol is a procedure, which you must write, that returns the list of bits that encodes a given symbol according to a given tree. You should design encode-symbol so that it signals an error if the symbol is not in the tree at all. Test your procedure by encoding the result you obtained in exercise 2.67 with the sample tree and seeing whether it is the same as the original sample message.
+
+Exercise 2.69.  The following procedure takes as its argument a list of symbol-frequency pairs (where no symbol appears in more than one pair) and generates a Huffman encoding tree according to the Huffman algorithm.
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+
+Make-leaf-set is the procedure given above that transforms the list of pairs into an ordered set of leaves. Successive-merge is the procedure you must write, using make-code-tree to successively merge the smallest-weight elements of the set until there is only one element left, which is the desired Huffman tree. (This procedure is slightly tricky, but not really complicated. If you find yourself designing a complex procedure, then you are almost certainly doing something wrong. You can take significant advantage of the fact that we are using an ordered set representation.)
+
+Exercise 2.70.  The following eight-symbol alphabet with associated relative frequencies was designed to efficiently encode the lyrics of 1950s rock songs. (Note that the ``symbols'' of an ``alphabet'' need not be individual letters.)
+
+A	2	NA	16
+BOOM	1	SHA	3
+GET	2	YIP	9
+JOB	2	WAH	1
+Use generate-huffman-tree (exercise 2.69) to generate a corresponding Huffman tree, and use encode (exercise 2.68) to encode the following message:
+
+Get a job
+
+Sha na na na na na na na na
+
+Get a job
+
+Sha na na na na na na na na
+
+Wah yip yip yip yip yip yip yip yip yip
+
+Sha boom
+
+How many bits are required for the encoding? What is the smallest number of bits that would be needed to encode this song if we used a fixed-length code for the eight-symbol alphabet?
+
+** Exercise 2.71.
+Suppose we have a Huffman tree for an alphabet of n symbols, and that the relative frequencies of the symbols are 1, 2, 4, ..., 2n-1. Sketch the tree for n=5; for n=10. In such a tree (for general n) how many bits are required to encode the most frequent symbol? the least frequent symbol?
+
+** Exercise 2.72.
+Consider the encoding procedure that you designed in exercise 2.68. What is the order of growth in the number of steps needed to encode a symbol? Be sure to include the number of steps needed to search the symbol list at each node encountered. To answer this question in general is difficult. Consider the special case where the relative frequencies of the n symbols are as described in exercise 2.71, and give the order of growth (as a function of n) of the number of steps needed to encode the most frequent and least frequent symbols in the alphabet.
+
+* Start of 2.4
+** Exercise 2.73.
+Section 2.3.2 described a program that performs symbolic differentiation:
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        ((sum? exp)
+         (make-sum (deriv (addend exp) var)
+                   (deriv (augend exp) var)))
+        ((product? exp)
+         (make-sum
+           (make-product (multiplier exp)
+                         (deriv (multiplicand exp) var))
+           (make-product (deriv (multiplier exp) var)
+                         (multiplicand exp))))
+        <more rules can be added here>
+        (else (error "unknown expression type -- DERIV" exp))))
+
+We can regard this program as performing a dispatch on the type of the expression to be differentiated. In this situation the ``type tag'' of the datum is the algebraic operator symbol (such as +) and the operation being performed is deriv. We can transform this program into data-directed style by rewriting the basic derivative procedure as
+
+(define (deriv exp var)
+   (cond ((number? exp) 0)
+         ((variable? exp) (if (same-variable? exp var) 1 0))
+         (else ((get 'deriv (operator exp)) (operands exp)
+                                            var))))
+(define (operator exp) (car exp))
+(define (operands exp) (cdr exp))
+
+a.  Explain what was done above. Why can't we assimilate the predicates number? and same-variable? into the data-directed dispatch?
+
+b.  Write the procedures for derivatives of sums and products, and the auxiliary code required to install them in the table used by the program above.
+
+c.  Choose any additional differentiation rule that you like, such as the one for exponents (exercise 2.56), and install it in this data-directed system.
+
+d.  In this simple algebraic manipulator the type of an expression is the algebraic operator that binds it together. Suppose, however, we indexed the procedures in the opposite way, so that the dispatch line in deriv looked like
+
+((get (operator exp) 'deriv) (operands exp) var)
+
+What corresponding changes to the derivative system are required?
+
+** Exercise 2.74.
+Insatiable Enterprises, Inc., is a highly decentralized conglomerate company consisting of a large number of independent divisions located all over the world. The company's computer facilities have just been interconnected by means of a clever network-interfacing scheme that makes the entire network appear to any user to be a single computer. Insatiable's president, in her first attempt to exploit the ability of the network to extract administrative information from division files, is dismayed to discover that, although all the division files have been implemented as data structures in Scheme, the particular data structure used varies from division to division. A meeting of division managers is hastily called to search for a strategy to integrate the files that will satisfy headquarters' needs while preserving the existing autonomy of the divisions.
+
+Show how such a strategy can be implemented with data-directed programming. As an example, suppose that each division's personnel records consist of a single file, which contains a set of records keyed on employees' names. The structure of the set varies from division to division. Furthermore, each employee's record is itself a set (structured differently from division to division) that contains information keyed under identifiers such as address and salary. In particular:
+
+a.  Implement for headquarters a get-record procedure that retrieves a specified employee's record from a specified personnel file. The procedure should be applicable to any division's file. Explain how the individual divisions' files should be structured. In particular, what type information must be supplied?
+
+b.  Implement for headquarters a get-salary procedure that returns the salary information from a given employee's record from any division's personnel file. How should the record be structured in order to make this operation work?
+
+c.  Implement for headquarters a find-employee-record procedure. This should search all the divisions' files for the record of a given employee and return the record. Assume that this procedure takes as arguments an employee's name and a list of all the divisions' files.
+
+d.  When Insatiable takes over a new company, what changes must be made in order to incorporate the new personnel information into the central system?
+
+** Exercise 2.75.
+Implement the constructor make-from-mag-ang in message-passing style. This procedure should be analogous to the make-from-real-imag procedure given above.
+
+** Exercise 2.76.
+
+As a large system with generic operations evolves, new types of data objects or new operations may be needed. For each of the three strategies -- generic operations with explicit dispatch, data-directed style, and message-passing-style -- describe the changes that must be made to a system in order to add new types or new operations. Which organization would be most appropriate for a system in which new types must often be added? Which would be most appropriate for a system in which new operations must often be added?
+
+* Start of 2.5
+
+** Exercise 2.82.
+Show how to generalize apply-generic to handle coercion in the general case of multiple arguments. One strategy is to attempt to coerce all the arguments to the type of the first argument, then to the type of the second argument, and so on. Give an example of a situation where this strategy (and likewise the two-argument version given above) is not sufficiently general. (Hint: Consider the case where there are some suitable mixed-type operations present in the table that will not be tried.)
+
+** Exercise 2.83.
+Suppose you are designing a generic arithmetic system for dealing with the tower of types shown in figure 2.25: integer, rational, real, complex. For each type (except complex), design a procedure that raises objects of that type one level in the tower. Show how to install a generic raise operation that will work for each type (except complex).
+
+** Exercise 2.84.
+Using the raise operation of exercise 2.83, modify the apply-generic procedure so that it coerces its arguments to have the same type by the method of successive raising, as discussed in this section. You will need to devise a way to test which of two types is higher in the tower. Do this in a manner that is ``compatible'' with the rest of the system and will not lead to problems in adding new levels to the tower.
+
+** Exercise 2.85.
+This section mentioned a method for ``simplifying'' a data object by lowering it in the tower of types as far as possible. Design a procedure drop that accomplishes this for the tower described in exercise 2.83. The key is to decide, in some general way, whether an object can be lowered. For example, the complex number 1.5 + 0i can be lowered as far as real, the complex number 1 + 0i can be lowered as far as integer, and the complex number 2 + 3i cannot be lowered at all. Here is a plan for determining whether an object can be lowered: Begin by defining a generic operation project that ``pushes'' an object down in the tower. For example, projecting a complex number would involve throwing away the imaginary part. Then a number can be dropped if, when we project it and raise the result back to the type we started with, we end up with something equal to what we started with. Show how to implement this idea in detail, by writing a drop procedure that drops an object as far as possible. You will need to design the various projection operations53 and install project as a generic operation in the system. You will also need to make use of a generic equality predicate, such as described in exercise 2.79. Finally, use drop to rewrite apply-generic from exercise 2.84 so that it ``simplifies'' its answers.
+
+** Exercise 2.86.
+Suppose we want to handle complex numbers whose real parts, imaginary parts, magnitudes, and angles can be either ordinary numbers, rational numbers, or other numbers we might wish to add to the system. Describe and implement the changes to the system needed to accommodate this. You will have to define operations such as sine and cosine that are generic over ordinary numbers and rational numbers.
+
+** Exercise 2.87.
+Install =zero? for polynomials in the generic arithmetic package. This will allow adjoin-term to work for polynomials with coefficients that are themselves polynomials.
+
+** Exercise 2.88.
+Extend the polynomial system to include subtraction of polynomials. (Hint: You may find it helpful to define a generic negation operation.)
+
+** Exercise 2.89.
+Define procedures that implement the term-list representation described above as appropriate for dense polynomials.
+
+** Exercise 2.90.
+Suppose we want to have a polynomial system that is efficient for both sparse and dense polynomials. One way to do this is to allow both kinds of term-list representations in our system. The situation is analogous to the complex-number example of section 2.4, where we allowed both rectangular and polar representations. To do this we must distinguish different types of term lists and make the operations on term lists generic. Redesign the polynomial system to implement this generalization. This is a major effort, not a local change.
+
+** Exercise 2.91.
+A univariate polynomial can be divided by another one to produce a polynomial quotient and a polynomial remainder. For example,
+
+
+Division can be performed via long division. That is, divide the highest-order term of the dividend by the highest-order term of the divisor. The result is the first term of the quotient. Next, multiply the result by the divisor, subtract that from the dividend, and produce the rest of the answer by recursively dividing the difference by the divisor. Stop when the order of the divisor exceeds the order of the dividend and declare the dividend to be the remainder. Also, if the dividend ever becomes zero, return zero as both quotient and remainder.
+
+We can design a div-poly procedure on the model of add-poly and mul-poly. The procedure checks to see if the two polys have the same variable. If so, div-poly strips off the variable and passes the problem to div-terms, which performs the division operation on term lists. Div-poly finally reattaches the variable to the result supplied by div-terms. It is convenient to design div-terms to compute both the quotient and the remainder of a division. Div-terms can take two term lists as arguments and return a list of the quotient term list and the remainder term list.
+
+Complete the following definition of div-terms by filling in the missing expressions. Use this to implement div-poly, which takes two polys as arguments and returns a list of the quotient and remainder polys.
+
+(define (div-terms L1 L2)
+  (if (empty-termlist? L1)
+      (list (the-empty-termlist) (the-empty-termlist))
+      (let ((t1 (first-term L1))
+            (t2 (first-term L2)))
+        (if (> (order t2) (order t1))
+            (list (the-empty-termlist) L1)
+            (let ((new-c (div (coeff t1) (coeff t2)))
+                  (new-o (- (order t1) (order t2))))
+              (let ((rest-of-result
+                     <compute rest of result recursively>
+                     ))
+                <form complete result>
+                ))))))
+
+
+Hierarchies of types in symbolic algebra
+
+Our polynomial system illustrates how objects of one type (polynomials) may in fact be complex objects that have objects of many different types as parts. This poses no real difficulty in defining generic operations. We need only install appropriate generic operations for performing the necessary manipulations of the parts of the compound types. In fact, we saw that polynomials form a kind of ``recursive data abstraction,'' in that parts of a polynomial may themselves be polynomials. Our generic operations and our data-directed programming style can handle this complication without much trouble.
+
+On the other hand, polynomial algebra is a system for which the data types cannot be naturally arranged in a tower. For instance, it is possible to have polynomials in x whose coefficients are polynomials in y. It is also possible to have polynomials in y whose coefficients are polynomials in x. Neither of these types is ``above'' the other in any natural way, yet it is often necessary to add together elements from each set. There are several ways to do this. One possibility is to convert one polynomial to the type of the other by expanding and rearranging terms so that both polynomials have the same principal variable. One can impose a towerlike structure on this by ordering the variables and thus always converting any polynomial to a ``canonical form'' with the highest-priority variable dominant and the lower-priority variables buried in the coefficients. This strategy works fairly well, except that the conversion may expand a polynomial unnecessarily, making it hard to read and perhaps less efficient to work with. The tower strategy is certainly not natural for this domain or for any domain where the user can invent new types dynamically using old types in various combining forms, such as trigonometric functions, power series, and integrals.
+
+It should not be surprising that controlling coercion is a serious problem in the design of large-scale algebraic-manipulation systems. Much of the complexity of such systems is concerned with relationships among diverse types. Indeed, it is fair to say that we do not yet completely understand coercion. In fact, we do not yet completely understand the concept of a data type. Nevertheless, what we know provides us with powerful structuring and modularity principles to support the design of large systems.
+
+** Exercise 2.92.
+By imposing an ordering on variables, extend the polynomial package so that addition and multiplication of polynomials works for polynomials in different variables. (This is not easy!)
+
+
+Extended exercise: Rational functions
+
+We can extend our generic arithmetic system to include rational functions. These are ``fractions'' whose numerator and denominator are polynomials, such as
+
+
+The system should be able to add, subtract, multiply, and divide rational functions, and to perform such computations as
+
+
+(Here the sum has been simplified by removing common factors. Ordinary ``cross multiplication'' would have produced a fourth-degree polynomial over a fifth-degree polynomial.)
+
+If we modify our rational-arithmetic package so that it uses generic operations, then it will do what we want, except for the problem of reducing fractions to lowest terms.
+
+** Exercise 2.93.
+Modify the rational-arithmetic package to use generic operations, but change make-rat so that it does not attempt to reduce fractions to lowest terms. Test your system by calling make-rational on two polynomials to produce a rational function
+
+(define p1 (make-polynomial 'x '((2 1)(0 1))))
+(define p2 (make-polynomial 'x '((3 1)(0 1))))
+(define rf (make-rational p2 p1))
+
+Now add rf to itself, using add. You will observe that this addition procedure does not reduce fractions to lowest terms.
+
+We can reduce polynomial fractions to lowest terms using the same idea we used with integers: modifying make-rat to divide both the numerator and the denominator by their greatest common divisor. The notion of ``greatest common divisor'' makes sense for polynomials. In fact, we can compute the GCD of two polynomials using essentially the same Euclid's Algorithm that works for integers.60 The integer version is
+
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+Using this, we could make the obvious modification to define a GCD operation that works on term lists:
+
+(define (gcd-terms a b)
+  (if (empty-termlist? b)
+      a
+      (gcd-terms b (remainder-terms a b))))
+
+where remainder-terms picks out the remainder component of the list returned by the term-list division operation div-terms that was implemented in exercise 2.91.
+
+** Exercise 2.94.
+Using div-terms, implement the procedure remainder-terms and use this to define gcd-terms as above. Now write a procedure gcd-poly that computes the polynomial GCD of two polys. (The procedure should signal an error if the two polys are not in the same variable.) Install in the system a generic operation greatest-common-divisor that reduces to gcd-poly for polynomials and to ordinary gcd for ordinary numbers. As a test, try
+
+(define p1 (make-polynomial 'x '((4 1) (3 -1) (2 -2) (1 2))))
+(define p2 (make-polynomial 'x '((3 1) (1 -1))))
+(greatest-common-divisor p1 p2)
+
+and check your result by hand.
+
+** Exercise 2.95.
+Define P1, P2, and P3 to be the polynomials
+
+
+
+Now define Q1 to be the product of P1 and P2 and Q2 to be the product of P1 and P3, and use greatest-common-divisor (exercise 2.94) to compute the GCD of Q1 and Q2. Note that the answer is not the same as P1. This example introduces noninteger operations into the computation, causing difficulties with the GCD algorithm.61 To understand what is happening, try tracing gcd-terms while computing the GCD or try performing the division by hand.
+
+We can solve the problem exhibited in exercise 2.95 if we use the following modification of the GCD algorithm (which really works only in the case of polynomials with integer coefficients). Before performing any polynomial division in the GCD computation, we multiply the dividend by an integer constant factor, chosen to guarantee that no fractions will arise during the division process. Our answer will thus differ from the actual GCD by an integer constant factor, but this does not matter in the case of reducing rational functions to lowest terms; the GCD will be used to divide both the numerator and denominator, so the integer constant factor will cancel out.
+
+More precisely, if P and Q are polynomials, let O1 be the order of P (i.e., the order of the largest term of P) and let O2 be the order of Q. Let c be the leading coefficient of Q. Then it can be shown that, if we multiply P by the integerizing factor c1+O1 -O2, the resulting polynomial can be divided by Q by using the div-terms algorithm without introducing any fractions. The operation of multiplying the dividend by this constant and then dividing is sometimes called the pseudodivision of P by Q. The remainder of the division is called the pseudoremainder.
+
+** Exercise 2.96.
+*** a.    
+Implement the procedure pseudoremainder-terms, which is just like remainder-terms except that it multiplies the dividend by the integerizing factor described above before calling div-terms. Modify gcd-terms to use pseudoremainder-terms, and verify that greatest-common-divisor now produces an answer with integer coefficients on the example in exercise 2.95. 
+
+*** b.    
+The GCD now has integer coefficients, but they are larger than those of P1. Modify gcd-terms so that it removes common factors from the coefficients of the answer by dividing all the coefficients by their (integer) greatest common divisor. 
+
+Thus, here is how to reduce a rational function to lowest terms:
+
+Compute the GCD of the numerator and denominator, using the version of gcd-terms from exercise 2.96.
+When you obtain the GCD, multiply both numerator and denominator by the same integerizing factor before dividing through by the GCD, so that division by the GCD will not introduce any noninteger coefficients. As the factor you can use the leading coefficient of the GCD raised to the power 1 + O1 - O2, where O2 is the order of the GCD and O1 is the maximum of the orders of the numerator and denominator. This will ensure that dividing the numerator and denominator by the GCD will not introduce any fractions.
+The result of this operation will be a numerator and denominator with integer coefficients. The coefficients will normally be very large because of all of the integerizing factors, so the last step is to remove the redundant factors by computing the (integer) greatest common divisor of all the coefficients of the numerator and the denominator and dividing through by this factor.
+** Exercise 2.97.
+*** a. 
+Implement this algorithm as a procedure reduce-terms that takes two term lists n and d as arguments and returns a list nn, dd, which are n and d reduced to lowest terms via the algorithm given above. Also write a procedure reduce-poly, analogous to add-poly, that checks to see if the two polys have the same variable. If so, reduce-poly strips off the variable and passes the problem to reduce-terms, then reattaches the variable to the two term lists supplied by reduce-terms.
+
+*** b. 
+Define a procedure analogous to reduce-terms that does what the original make-rat did for integers:
+
+(define (reduce-integers n d)
+(let ((g (gcd n d)))
+(list (/ n g) (/ d g))))
+
+and define reduce as a generic operation that calls apply-generic to dispatch to either reduce-poly (for polynomial arguments) or reduce-integers (for scheme-number arguments). You can now easily make the rational-arithmetic package reduce fractions to lowest terms by having make-rat call reduce before combining the given numerator and denominator to form a rational number. The system now handles rational expressions in either integers or polynomials. To test your program, try the example at the beginning of this extended exercise:
+
+(define p1 (make-polynomial 'x '((1 1)(0 1))))
+(define p2 (make-polynomial 'x '((3 1)(0 -1))))
+(define p3 (make-polynomial 'x '((1 1))))
+(define p4 (make-polynomial 'x '((2 1)(0 -1))))
+
+(define rf1 (make-rational p1 p2))
+(define rf2 (make-rational p3 p4))
+
+(add rf1 rf2)
+
+See if you get the correct answer, correctly reduced to lowest terms.
+
+The GCD computation is at the heart of any system that does operations on rational functions. The algorithm used above, although mathematically straightforward, is extremely slow. The slowness is due partly to the large number of division operations and partly to the enormous size of the intermediate coefficients generated by the pseudodivisions. One of the active areas in the development of algebraic-manipulation systems is the design of better algorithms for computing polynomial GCDs
+
+
+* Ch 3
