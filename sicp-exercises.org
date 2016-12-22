@@ -7,9 +7,9 @@
 * Intro
 In order to run this code in emacs, you should run this elisp
 #+begin_src emacs-lisp :tangle yes
-(add-to-list 'org-src-lang-modes '("scheme" . scheme) )
-(add-to-list 'org-babel-load-languages '(scheme . t))
-(org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t) (scheme . t) ))
+  (add-to-list 'org-src-lang-modes '("scheme" . scheme) )
+  (add-to-list 'org-babel-load-languages '(scheme . t))
+  (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t) (scheme . t) ))
 #+end_src
 
 #+RESULTS:
@@ -229,10 +229,10 @@ CLOSED: [2016-11-28 Mon 13:54]
   The following pattern of numbers is called Pascal's triangle.
 
       1 
-    1 1
+     1 1
     1 2 1
   1 3 3 1
-  1 4 6 4 1
+ 1 4 6 4 1
 ...........
 
 p(5, 4) = p(4,3) + p(4, 4) 
@@ -244,21 +244,21 @@ The numbers at the edge of the triangle are all 1, and each number inside the tr
 
 #+begin_src scheme :tangle yes
   ;;assumes valid input
-  (define (pascals-triangle level n-from-l)
-    ;(define op (if 
+  (define (pascals-triangle row n-from-l)
+    ;(define op (if
     ;(= (remainder n-from-l 2) 0)  + -))
-    (cond  ((and (= level 1) (= n-from-l 1)) 1)
+    (cond  ((and (= row 1) (= n-from-l 1)) 1)
           ((< n-from-l 1) 0) ; left of first triangular value
-          ((> n-from-l level) 0) ; right of last triangular value
-          (else (+ (pascals-triangle (- level 1 ) n-from-l) (pascals-triangle (- level 1) (- n-from-l 1))))
+          ((> n-from-l row) 0) ; right of last triangular value
+          (else (+ (pascals-triangle (- row 1 ) n-from-l) (pascals-triangle (- row 1) (- n-from-l 1))))
           )
           )
 
-  (pascals-triangle 5 3)
+  (pascals-triangle 5 2)
     #+end_src
 
 #+RESULTS:
-: 6
+: 4
 
 ** DONE Exercise 1.16.
 CLOSED: [2016-11-28 Mon 15:24]
@@ -573,17 +573,61 @@ What is the corresponding definition of cdr? (Hint: To verify that this works, m
 (cdr (cons 1 2))
 #+end_src
 
-** TODO Exercise 2.6.  
+** DONE Exercise 2.6.  
+   CLOSED: [2016-11-30 Wed 12:42]
 In case representing pairs as procedures wasn't mind-boggling enough, consider that, in a language that can manipulate procedures, we can get by without numbers (at least insofar as nonnegative integers are concerned) by implementing 0 and the operation of adding 1 as
 
-(define zero (lambda (f) (lambda (x) x)))
-
-(define (add-1 n)
-  (lambda (f) (lambda (x) (f ((n f) x)))))
+//see add-1 and zero below
 
 This representation is known as Church numerals, after its inventor, Alonzo Church, the logician who invented the  calculus.
 
 Define one and two directly (not in terms of zero and add-1). (Hint: Use substitution to evaluate (add-1 zero)). Give a direct definition of the addition procedure + (not in terms of repeated application of add-1).
+
+
+
+(define (add-1 zero)
+  (lambda (f) (lambda (x) (f ((zero f) x)))))
+  
+
+->  (lambda (f) (lambda (x) (f x)))
+
+
+
+
+#+begin_src scheme :tangle yes
+;; Church Numerals
+(define zero (lambda (f) (lambda (x) x)))
+
+(define (one f) (lambda (x) (f x)))
+(define (two f) (lambda (x) (f (f x))))
+
+(define (add-church n1 n2) (lambda (f) (lambda (x) ((n1 f) ((n2 f) x)))))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+
+;;helper fns pulled from online for checking solutions
+
+ ;; Recursive process 
+ (define (int->church n) 
+   (if (= n 0) 
+       zero 
+       (add-1 (int->church (- n 1))))) 
+  
+ (define (church->int cn) 
+   ((cn (lambda (n) (+ n 1))) 0)) 
+
+; test 
+(church->int (add-1(add-church two two)))
+(church->int two)
+(church->int one)
+(church->int zero)
+#+end_src
+
+#+RESULTS:
+: 0
+
 
 ** TODO 2.1.4  Extended Exercise: Interval Arithmetic
 
@@ -622,35 +666,106 @@ To divide two intervals, Alyssa multiplies the first by the reciprocal of the se
 *** TODO Exercise 2.7.
 Alyssa's program is incomplete because she has not specified the implementation of the interval abstraction. Here is a definition of the interval constructor:
 
-(define (make-interval a b) (cons a b))
+// moved below
 
 Define selectors upper-bound and lower-bound to complete the implementation.
 
-*** TODO Exercise 2.8.
+#+begin_src scheme :tangle yes
+(define (make-interval a b) (cons a b))
+
+(define (lower-bound interval)(min ( car interval ) (cdr interval)))
+(define (upper-bound interval)(max ( car interval ) (cdr interval)))
+;; Expected result: 
+(define R_low 1)
+(define R_hi 10)
+;(f 0)
+#+end_src
+
+*** DONE Exercise 2.8.
+    CLOSED: [2016-11-30 Wed 19:39]
 Using reasoning analogous to Alyssa's, describe how the difference of two intervals may be computed. Define a corresponding subtraction procedure, called sub-interval.
 
-*** TODO Exercise 2.9.
-The width of an interval is half of the difference between its upper and lower bounds. The width is a measure of the uncertainty of the number specified by the interval. For some arithmetic operations the width of the result of combining two intervals is a function only of the widths of the argument intervals, whereas for others the width of the combination is not a function of the widths of the argument intervals. Show that the width of the sum (or difference) of two intervals is a function only of the widths of the intervals being added (or subtracted). Give examples to show that this is not true for multiplication or division.
+#+begin_src scheme :tangle yes
+(define (sub-interval x y)
+    (make-interval (- (lower-bound x) (lower-bound y)) (- (upper-bound x) ( upper-bound y))))
+;; Expected result: 
 
-*** TODO Exercise 2.10.
+#+end_src
+
+
+*** DONE Exercise 2.9.
+    CLOSED: [2016-11-30 Wed 19:44]
+The width of an interval is half of the difference between its upper and lower bounds. The width is a measure of the uncertainty of the number specified by the interval. For some arithmetic operations the width of the result of combining two intervals is a function only of the widths of the argument intervals, whereas for others the width of the combination is not a function of the widths of the argument intervals. Show that the width of the sum (or difference) of two intervals is a function only of the widths of the intervals being added (or subtracted). Give examples to show that this is not true for multiplication or division.
+#+begin_src scheme :tangle yes
+(define (make-interval a b) (cons a b))
+
+(define (lower-bound interval)(min ( car interval ) (cdr interval)))
+(define (upper-bound interval)(max ( car interval ) (cdr interval)))
+
+(define (width interval)
+(- (upper-bound interval) (lower-bound interval)))
+
+;; Expected result:  9
+(width (make-interval 1 10))
+#+end_src
+
+#+RESULTS:
+: 9
+
+*** DONE Exercise 2.10.
+    CLOSED: [2016-11-30 Wed 20:03]
 Ben Bitdiddle, an expert systems programmer, looks over Alyssa's shoulder and comments that it is not clear what it means to divide by an interval that spans zero. Modify Alyssa's code to check for this condition and to signal an error if it occurs.
 
-*** TODO Exercise 2.11.
-In passing, Ben also cryptically comments: ``By testing the signs of the endpoints of the intervals, it is possible to break mul-interval into nine cases, only one of which requires more than two multiplications.'' Rewrite this procedure using Ben's suggestion.
+#+begin_src scheme :tangle yes
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
 
+  (define (make-interval a b) (cons a b))
+  (define (lower-bound interval)(min ( car interval ) (cdr interval)))
+  (define (upper-bound interval)(max ( car interval ) (cdr interval)))
+  (define (div-interval x y)
+    (if (or (= (upper-bound y) 0) (= (lower-bound y) 0)
+            ) (error "Cannot divide interval that spans 0")
+        (mul-interval x
+                      (make-interval (/ 1.0 (upper-bound y))
+                                     (/ 1.0 (lower-bound y)))))
+    )
+
+  (div-interval (make-interval 2 1) (make-interval 1 1))
+#+end_src
+
+#+RESULTS:
+: (1.0 . 2.0)
+
+*** DONE Exercise 2.12.
+    CLOSED: [2016-11-30 Wed 21:54]
 After debugging her program, Alyssa shows it to a potential user, who complains that her program solves the wrong problem. He wants a program that can deal with numbers represented as a center value and an additive tolerance; for example, he wants to work with intervals such as 3.5± 0.15 rather than [3.35, 3.65]. Alyssa returns to her desk and fixes this problem by supplying an alternate constructor and alternate selectors:
-
-(define (make-center-width c w)
-  (make-interval (- c w) (+ c w)))
-(define (center i)
-  (/ (+ (lower-bound i) (upper-bound i)) 2))
-(define (width i)
-  (/ (- (upper-bound i) (lower-bound i)) 2))
 
 Unfortunately, most of Alyssa's users are engineers. Real engineering situations usually involve measurements with only a small uncertainty, measured as the ratio of the width of the interval to the midpoint of the interval. Engineers usually specify percentage tolerances on the parameters of devices, as in the resistor specifications given earlier.
 
-*** TODO Exercise 2.12.
 Define a constructor make-center-percent that takes a center and a percentage tolerance and produces the desired interval. You must also define a selector percent that produces the percentage tolerance for a given interval. The center selector is the same as the one shown above.
+#+begin_src scheme :tangle yes
+  (define (make-interval a b) (cons a b))
+  (define (lower-bound interval)(min ( car interval ) (cdr interval)))
+  (define (upper-bound interval)(max ( car interval ) (cdr interval)))
+  (define (make-center-percent c p)
+    (make-interval (- c (* c p)) (+ c (* c p))))
+  (define (center i)
+    (/ (+ (lower-bound i) (upper-bound i)) 2))
+  (define (width i)
+    (/ (- (upper-bound i) (lower-bound i)) 2))
+
+  ;; Expected result:
+  (width (make-center-percent 2 2))
+#+end_src
+
+#+RESULTS:
+: 4
 
 *** TODO Exercise 2.13.
 Show that under the assumption of small percentage tolerances there is a simple formula for the approximate percentage tolerance of the product of two intervals in terms of the tolerances of the factors. You may simplify the problem by assuming that all numbers are positive.
@@ -705,7 +820,8 @@ Explain, in general, why equivalent algebraic expressions may lead to different 
 #+RESULTS:
 : (34)
 
-** TODO Exercise 2.18.
+** DONE Exercise 2.18.
+   CLOSED: [2016-11-30 Wed 19:03]
 Define a procedure reverse that takes a list as argument and returns a list of the same elements in reverse order:
 
 (reverse (list 1 4 9 16 25))
@@ -948,19 +1064,40 @@ Complete the following definitions of reverse (exercise 2.18) in terms of fold-r
   Write a procedure to find all ordered triples of distinct positive integers i, j, and k less than or equal to a given integer n that sum to a given integer s.
 
 * Start of 2.3
-** TODO Exercise 2.53.
+** DONE Exercise 2.53.
+   CLOSED: [2016-11-30 Wed 01:06]
 What would the interpreter print in response to evaluating each of the following expressions?
 
 (list 'a 'b 'c)
 
 (list (list 'george))
+
 (cdr '((x1 x2) (y1 y2)))
 
 (cadr '((x1 x2) (y1 y2)))
+
 (pair? (car '(a short list)))
+
 (memq 'red '((red shoes) (blue socks)))
 
 (memq 'red '(red shoes blue socks))
+
+*** Answers
+(a b c)
+
+((george))
+
+((y1 y2)))
+
+(y1 y2))
+
+#f
+
+#f
+
+(red shoes blue socks)
+
+
 
 ** DONE Exercise 2.54.
    CLOSED: [2016-11-30 Wed 00:08]
@@ -1007,8 +1144,8 @@ It is interpreting the symbol ' as the function quote literally, and thus is quo
 ** TODO Exercise 2.56.
 Show how to extend the basic differentiator to handle more kinds of expressions. For instance, implement the differentiation rule
 
-by adding a new clause to the deriv program and defining appropriate procedures exponentiation?, base, exponent, and make-exponentiation. (You may use the symbol ** to denote exponentiation.) Build in the rules that anything raised to the power 0 is 1 and anything raised to the power 1 is the thing itself.
-
+by adding a new clause to the deriv program and defining appropriate procedures exponentiation?, base, exponent, and make-exponentiation. (You may use the symbol ** to denote exponentiation.) Build in the rules that anything raised to the power 0 is 1 and anything raised to the power 1 is the thing itself. 
+ 
 ** TODO Exercise 2.57.
 Extend the differentiation program to handle sums and products of arbitrary numbers of (two or more) terms. Then the last example above could be expressed as
 
